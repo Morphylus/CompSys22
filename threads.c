@@ -70,22 +70,20 @@ void schedule(void) {
 }
 
 void thread_exit(void) {
-    struct thread* tmp = current_thread;
-    struct thread* anc = last;
+    printf("Exiting thread...");
 
-    if(last == NULL) {
+    struct thread* tmp = current_thread;
+
+    // Last thread in ring, jump back to entry point
+    if(current_thread->next == current_thread) {
         // Last thread finished execution
+        free(current_thread->t_stack);
+        free(current_thread);
         longjmp(entry, 1);
     }
 
-
-    // Find ancestor of current_thread
-    while(anc->next != current_thread) {
-        anc = anc->next;
-    }
-
     // Remove thread from circular buffer and free memory
-    anc->next = current_thread->next;
+    last_exec->next = current_thread->next;
     current_thread = current_thread->next;
     
     free(tmp->t_stack);
